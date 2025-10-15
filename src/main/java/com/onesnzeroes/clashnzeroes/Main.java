@@ -26,8 +26,8 @@ public class Main {
         //pm.generateTrophyChartAsync("#QCPYVQRJ2");
         //pm.generateTrophyChartAsync("#8L2RQ29G0");
         //pm.generateTrophyChartAsync("#QUJLCCU");
-        pm.savePlayer("#QCPYVQRJ2");
-        pm.savePlayer("#8L2RQ29G0");
-        pm.savePlayer("#QUJLCCU");
+        //pm.savePlayer("#QCPYVQRJ2");
+        //pm.savePlayer("#8L2RQ29G0");
+        //pm.savePlayer("#QUJLCCU");
     }
 }
