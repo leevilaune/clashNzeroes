@@ -1,35 +1,33 @@
 package com.onesnzeroes.clashnzeroes.datasource;
 
-import jakarta.persistence.*;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MariaDbJpaConnection {
 
-    private static EntityManagerFactory emf = null;
-    private static EntityManager em = null;
+    private static final EntityManagerFactory emf = createEntityManagerFactory();
 
-    public static EntityManager getInstance() {
-        try{
-            if (em==null) {
-                if (emf==null) {
-                    Map<String, String> props = new HashMap<>();
-                    props.put("jakarta.persistence.jdbc.user", System.getenv("DB_USER"));
-                    props.put("jakarta.persistence.jdbc.password", System.getenv("DB_PASSWORD"));
-                    props.put("jakarta.persistence.jdbc.url",System.getenv("DB_URL"));
-                    emf = Persistence.createEntityManagerFactory("clashPU", props);
-                    System.out.println(emf);
-                }
-                em = emf.createEntityManager();
-                System.out.println(em);
-            }
-        }catch (Exception e){
-            System.out.println("fuck me");
+    private static EntityManagerFactory createEntityManagerFactory() {
+        try {
+            Map<String, String> props = new HashMap<>();
+            props.put("jakarta.persistence.jdbc.user", System.getenv("DB_USER"));
+            props.put("jakarta.persistence.jdbc.password", System.getenv("DB_PASSWORD"));
+            props.put("jakarta.persistence.jdbc.url", System.getenv("DB_URL"));
+            props.put("jakarta.persistence.jdbc.driver", "org.mariadb.jdbc.Driver");
+
+            EntityManagerFactory factory = Persistence.createEntityManagerFactory("clashPU", props);
+            System.out.println("EntityManagerFactory initialized: " + factory);
+            return factory;
+        } catch (Exception e) {
+            System.err.println("Failed to initialize EntityManagerFactory:");
             e.printStackTrace();
-            return null;
+            throw new RuntimeException("Could not initialize JPA connection", e);
         }
-        return em;
     }
+
     public static EntityManager getEntityManager() {
         return emf.createEntityManager();
     }
