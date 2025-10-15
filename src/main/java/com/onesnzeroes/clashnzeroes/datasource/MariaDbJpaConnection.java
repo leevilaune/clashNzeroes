@@ -16,7 +16,7 @@ public class MariaDbJpaConnection {
                     Map<String, String> props = new HashMap<>();
                     props.put("jakarta.persistence.jdbc.user", System.getenv("DB_USER"));
                     props.put("jakarta.persistence.jdbc.password", System.getenv("DB_PASSWORD"));
-
+                    props.put("jakarta.persistence.jdbc.url",System.getenv("DB_URL"));
                     emf = Persistence.createEntityManagerFactory("clashPU", props);
                     System.out.println(emf);
                 }
