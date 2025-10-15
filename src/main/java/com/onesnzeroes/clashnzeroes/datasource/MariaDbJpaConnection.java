@@ -30,4 +30,7 @@ public class MariaDbJpaConnection {
         }
         return em;
     }
+    public static EntityManager getEntityManager() {
+        return emf.createEntityManager();
+    }
 }

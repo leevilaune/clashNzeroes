@@ -22,9 +22,12 @@ public class Main {
             System.out.println("Shutting down scheduler " + Instant.now());
             scheduler.stop();
         }));
-        pm.savePlayers();
+        //pm.savePlayers();
         //pm.generateTrophyChartAsync("#QCPYVQRJ2");
         //pm.generateTrophyChartAsync("#8L2RQ29G0");
-        pm.generateTrophyChartAsync("#QUJLCCU");
+        //pm.generateTrophyChartAsync("#QUJLCCU");
+        pm.savePlayer("#QCPYVQRJ2");
+        pm.savePlayer("#8L2RQ29G0");
+        pm.savePlayer("#QUJLCCU");
     }
 }
