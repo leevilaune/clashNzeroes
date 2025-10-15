@@ -29,3 +29,21 @@ tasks.test {
 application {
     mainClass = 'com.onesnzeroes.clashnzeroes.Main'
 }
+
+tasks.register('fatJar', Jar) {
+    group = 'build'
+    description = 'Assemble a fat JAR with dependencies'
+
+    archiveClassifier.set('all') // clashNzeroes-1.0-SNAPSHOT-all.jar
+
+    from(sourceSets.main.get().output)
+
+    dependsOn(configurations.runtimeClasspath)
+    from({
+        configurations.runtimeClasspath.get().filter { it.name.endsWith('jar') }.collect { zipTree(it) }
+    })
+
+    manifest {
+        attributes 'Main-Class': 'com.onesnzeroes.clashnzeroes.Main'
+    }
+}
