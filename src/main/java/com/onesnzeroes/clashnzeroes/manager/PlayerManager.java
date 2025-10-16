@@ -145,13 +145,18 @@ public class PlayerManager {
 
         int maxTrophy = trophies.stream().max(Integer::compareTo).orElse(0);
         int minTrophy = trophies.stream().min(Integer::compareTo).orElse(0);
-        int range = Math.max(1, maxTrophy - minTrophy);
+        int range = Math.max(25, maxTrophy - minTrophy);
+        int margin = (int) (range * 0.05);
+
 
         g.setColor(Color.BLACK);
         g.drawString(String.valueOf(maxTrophy),25,40);
-        g.drawString(String.valueOf(minTrophy),25,height-50);
+        g.drawString(String.valueOf(minTrophy),25,height-60);
 
-        minTrophy-=10;
+        maxTrophy+=margin;
+        minTrophy-=margin;
+        range = Math.max(25, maxTrophy - minTrophy);
+
         g.setColor(Color.ORANGE);
         int chartWidth = width - 100;
         int chartHeight = height - 100;
