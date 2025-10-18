@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onesnzeroes.clashnzeroes.dao.PlayerDao;
 import com.onesnzeroes.clashnzeroes.logic.scheduler.WarDataScheduler;
 import com.onesnzeroes.clashnzeroes.model.player.PlayerEntity;
+import com.onesnzeroes.clashnzeroes.model.war.WarEntity;
 
 import java.io.IOException;
 import java.net.URI;
@@ -46,7 +47,13 @@ public class PlayerManager {
         System.out.println(response.body());
         PlayerEntity player = mapper.readValue(response.body(), PlayerEntity.class);
         String clanTag = player.getClan().getTag();
-        warScheduler.scheduleWarRecording(clanTag,warScheduler.getWarManager().getCurrentWar(clanTag).getEndTime());
+        WarEntity we = warScheduler.getWarManager().getCurrentWar(clanTag);
+        System.out.println(we);
+        if(we.getState() == null){
+            System.out.println("Clan " + clanTag + " doesnt have public warlog");
+        }else{
+            warScheduler.scheduleWarRecording(clanTag,we.getEndTime());
+        }
         this.dao.persist(player);
     }
 
