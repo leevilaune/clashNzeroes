@@ -1,4 +1,4 @@
-package com.onesnzeroes.clashnzeroes.model;
+package com.onesnzeroes.clashnzeroes.model.player;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -6,22 +6,16 @@ import jakarta.persistence.Embeddable;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Embeddable
-public class IconUrls {
+public class BadgeUrls {
 
     @JsonProperty("small")
     private String small;
 
+    @JsonProperty("medium")
+    private String medium;
+
     @JsonProperty("large")
     private String large;
-
-    public IconUrls(String small, String large) {
-        this.small = small;
-        this.large = large;
-    }
-
-    public IconUrls(){
-
-    }
 
     public String getSmall() {
         return small;
@@ -29,6 +23,14 @@ public class IconUrls {
 
     public void setSmall(String small) {
         this.small = small;
+    }
+
+    public String getMedium() {
+        return medium;
+    }
+
+    public void setMedium(String medium) {
+        this.medium = medium;
     }
 
     public String getLarge() {
@@ -41,8 +43,9 @@ public class IconUrls {
 
     @Override
     public String toString() {
-        return "IconUrls{" +
+        return "BadgeUrls{" +
                 "small='" + small + '\'' +
+                ", medium='" + medium + '\'' +
                 ", large='" + large + '\'' +
                 '}';
     }

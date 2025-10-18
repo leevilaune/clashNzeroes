@@ -1,75 +1,33 @@
-package com.onesnzeroes.clashnzeroes.manager;
+package com.onesnzeroes.clashnzeroes.logic.graphic;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onesnzeroes.clashnzeroes.dao.PlayerDao;
-import com.onesnzeroes.clashnzeroes.model.PlayerEntity;
+import com.onesnzeroes.clashnzeroes.model.player.PlayerEntity;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URL;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.Date;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class PlayerManager {
-
-    private static final String API_TOKEN = System.getenv("CLASH_TOKEN");
-    private static final String BASE_URL = "https://api.clashofclans.com/v1";
+public class PlayerGraphicManager {
 
     private PlayerDao dao;
-    private HttpClient client;
-    private ObjectMapper mapper;
 
-
-    public PlayerManager(){
-        this.dao = new PlayerDao();
-        this.client = HttpClient.newHttpClient();
-        this.mapper = new ObjectMapper();
+    public PlayerGraphicManager(PlayerDao dao){
+        this.dao = dao;
     }
 
-    public void savePlayer(String playerTag) throws IOException, InterruptedException {
-        String encodedTag = playerTag.replace("#", "%23");
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(BASE_URL + "/players/" + encodedTag))
-                .header("Authorization", "Bearer " + API_TOKEN)
-                .header("Accept", "application/json")
-                .GET()
-                .build();
-
-        HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
-
-        System.out.println("Response code: " + response.statusCode());
-        System.out.println(response.body());
-        PlayerEntity player = mapper.readValue(response.body(), PlayerEntity.class);
-        this.dao.persist(player);
-    }
-
-    public void savePlayers(){
-        this.dao.findUniquePlayerTags().forEach(tag -> {
-            try {
-                savePlayer(tag);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        });
-    }
-
-    public List<Integer> getTrophies(String tag){
-        return this.dao.findTrophies(tag);
-    }
-
-    public void generateTrophyChartAsync(String tag) {
-        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> generateTrophyChart(tag))
+    public void generateChartAsync(String tag, String type) {
+        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> generateChart(tag,type))
                 .thenRun(() -> System.out.println("Chart generation complete for " + tag))
                 .exceptionally(ex -> {
                     ex.printStackTrace();
@@ -78,8 +36,13 @@ public class PlayerManager {
         future.join();
     }
 
-    private void generateTrophyChart(String tag) {
-        List<Integer> trophies = getTrophies(tag);
+    private void generateChart(String tag, String field) {
+        List<Integer> data = new ArrayList<>();
+        if(field.equalsIgnoreCase("trophies")){
+            data = dao.findTrophies(tag);
+        } else if (field.equalsIgnoreCase("donations")) {
+            data = dao.findDonations(tag);
+        }
         PlayerEntity player = this.dao.findLatestByTag(tag);
         String[] townHallImages = {
                 "https://static.wikia.nocookie.net/clashofclans/images/f/fd/Town_Hall1.png",
@@ -100,7 +63,7 @@ public class PlayerManager {
                 "https://static.wikia.nocookie.net/clashofclans/images/5/53/Town_Hall16.png",
                 "https://static.wikia.nocookie.net/clashofclans/images/2/24/Town_Hall17-1.png"
         };
-        if (trophies.isEmpty()) {
+        if (data.isEmpty()) {
             System.out.println("No trophies found for tag " + tag);
             return;
         }
@@ -113,7 +76,10 @@ public class PlayerManager {
         int badgeY = height - 50;
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = image.createGraphics();
-
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
         g.setColor(Color.WHITE);
         g.fillRect(0, 0, width, height);
         g.setColor(Color.BLACK);
@@ -124,7 +90,10 @@ public class PlayerManager {
         g.drawString(player.getName()+player.getTag(),100,height-30);
         g.drawString(String.valueOf(player.getTownHallLevel()),125,height-10);
         g.drawString(String.valueOf(player.getTrophies()),180,height-10);
-
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        g.drawString(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).format(formatter),width-175,25);
+        String title = field.substring(0, 1).toUpperCase() + field.substring(1);
+        g.drawString(title + " History", 50, 25);
         g.setFont(new Font("Dialog", Font.PLAIN, 18));
         FontMetrics fm = g.getFontMetrics();
         String clanName = player.getClan().getName();
@@ -143,15 +112,15 @@ public class PlayerManager {
         }
         g.setFont(new Font("Dialog", Font.PLAIN, 12));
 
-        int maxTrophy = trophies.stream().max(Integer::compareTo).orElse(0);
-        int minTrophy = trophies.stream().min(Integer::compareTo).orElse(0);
+        int maxTrophy = data.stream().max(Integer::compareTo).orElse(0);
+        int minTrophy = data.stream().min(Integer::compareTo).orElse(0);
         int range = Math.max(25, maxTrophy - minTrophy);
         int margin = (int) (range * 0.05);
 
 
         g.setColor(Color.BLACK);
-        g.drawString(String.valueOf(maxTrophy),25,40);
-        g.drawString(String.valueOf(minTrophy),25,height-60);
+        g.drawString(String.valueOf(maxTrophy),15,40);
+        g.drawString(String.valueOf(minTrophy),15,height-60);
 
         maxTrophy+=margin;
         minTrophy-=margin;
@@ -160,24 +129,44 @@ public class PlayerManager {
         g.setColor(Color.ORANGE);
         int chartWidth = width - 100;
         int chartHeight = height - 100;
-        int n = trophies.size();
+        int n = data.size();
 
         for (int i = 1; i < n; i++) {
             int x1 = 50 + (i - 1) * chartWidth / (n - 1);
             int x2 = 50 + i * chartWidth / (n - 1);
-            int y1 = height - 50 - (trophies.get(i - 1) - minTrophy) * chartHeight / range;
-            int y2 = height - 50 - (trophies.get(i) - minTrophy) * chartHeight / range;
+            int y1 = height - 50 - (data.get(i - 1) - minTrophy) * chartHeight / range;
+            int y2 = height - 50 - (data.get(i) - minTrophy) * chartHeight / range;
             g.drawLine(x1, y1, x2, y2);
         }
-
+        drawRotatedCornerText(g,"© onesNzeroes 2025",width,height);
         g.dispose();
 
         try {
-            File outFile = new File("trophies_" + tag + ".png");
+            File outFile = new File(field+"_" + tag + ".png");
             ImageIO.write(image, "png", outFile);
             System.out.println("Chart saved: " + outFile.getAbsolutePath());
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    private void drawRotatedCornerText(Graphics2D g2d, String text, int imageWidth, int imageHeight) {
+        AffineTransform oldTransform = g2d.getTransform();
+        Composite oldComposite = g2d.getComposite();
+
+        g2d.setFont(new Font("Arial", Font.PLAIN, 14));
+        g2d.setColor(Color.BLACK);
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.75f));
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+        int margin = 5;
+
+        int x = imageWidth - margin;
+        int y = imageHeight - margin;
+        g2d.rotate(Math.toRadians(-90), x, y);
+
+        g2d.drawString(text, imageWidth - margin, imageHeight - margin);
+
+        g2d.setTransform(oldTransform);
+        g2d.setComposite(oldComposite);
     }
 }

@@ -1,39 +1,26 @@
-package com.onesnzeroes.clashnzeroes.manager;
+package com.onesnzeroes.clashnzeroes.logic.scheduler;
 
-import java.time.Duration;
+import com.onesnzeroes.clashnzeroes.logic.manager.PlayerManager;
+
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
-public class PlayerDataScheduler {
+public class PlayerDataScheduler extends DataScheduler {
 
     private PlayerManager playerManager;
     private ScheduledExecutorService scheduler;
+    private WarDataScheduler warScheduler;
 
-    public PlayerDataScheduler(PlayerManager pm) {
+    public PlayerDataScheduler(PlayerManager pm, long periodMillis, WarDataScheduler warScheduler) {
+        super(periodMillis);
         this.playerManager = pm;
         this.scheduler = Executors.newScheduledThreadPool(1);
+        this.warScheduler = warScheduler;
     }
 
-    public void startEvenHourSave() {
-        Runnable saveTask = () -> {
-            try {
-                System.out.println("Saving player data at " + Instant.now());
-                this.playerManager.savePlayers();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        };
-
-        long initialDelay = computeDelayToNextEvenHour();
-        System.out.println("First save in " + initialDelay + " seconds");
-
-        this.scheduler.scheduleAtFixedRate(saveTask, initialDelay, 3600, TimeUnit.SECONDS);
-    }
-
-    private long computeDelayToNextEvenHour() {
+    @Override
+    public long computeDelay() {
         Instant now = Instant.now();
         long epochSeconds = now.getEpochSecond();
 
@@ -47,6 +34,18 @@ public class PlayerDataScheduler {
 
         return nextEvenHourSeconds - secondsInDay;
     }
+
+    @Override
+    public void scheduledAction(){
+        System.out.println("Scheduled player save at " + Instant.now());
+        this.playerManager.savePlayers();
+    }
+
+    @Override
+    public void onFinish(){
+        System.out.println("Finished saving players at " + Instant.now());
+    }
+
     public void stop() {
         this.scheduler.shutdown();
     }

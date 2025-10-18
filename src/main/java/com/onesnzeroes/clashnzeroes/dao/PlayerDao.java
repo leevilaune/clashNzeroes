@@ -1,9 +1,9 @@
 package com.onesnzeroes.clashnzeroes.dao;
 
 import com.onesnzeroes.clashnzeroes.datasource.MariaDbJpaConnection;
-import com.onesnzeroes.clashnzeroes.model.ClanEntity;
-import com.onesnzeroes.clashnzeroes.model.LeagueEntity;
-import com.onesnzeroes.clashnzeroes.model.PlayerEntity;
+import com.onesnzeroes.clashnzeroes.model.player.ClanEntity;
+import com.onesnzeroes.clashnzeroes.model.player.LeagueEntity;
+import com.onesnzeroes.clashnzeroes.model.player.PlayerEntity;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -103,6 +103,19 @@ public class PlayerDao {
         try {
             TypedQuery<Integer> query = em.createQuery(
                     "SELECT p.trophies FROM PlayerEntity p WHERE p.tag = :tag ORDER BY p.ts ASC",
+                    Integer.class);
+            query.setParameter("tag", tag);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<Integer> findDonations(String tag) {
+        EntityManager em = MariaDbJpaConnection.getEntityManager();
+        try {
+            TypedQuery<Integer> query = em.createQuery(
+                    "SELECT p.donations FROM PlayerEntity p WHERE p.tag = :tag ORDER BY p.ts ASC",
                     Integer.class);
             query.setParameter("tag", tag);
             return query.getResultList();

@@ -7,11 +7,16 @@
 
     <persistence-unit name="clashPU" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-        <class>com.onesnzeroes.clashnzeroes.model.PlayerEntity</class>
-        <class>com.onesnzeroes.clashnzeroes.model.IconUrls</class>
-        <class>com.onesnzeroes.clashnzeroes.model.ClanEntity</class>
-        <class>com.onesnzeroes.clashnzeroes.model.BadgeUrls</class>
-        <class>com.onesnzeroes.clashnzeroes.model.LeagueEntity</class>
+        <class>com.onesnzeroes.clashnzeroes.model.player.PlayerEntity</class>
+        <class>com.onesnzeroes.clashnzeroes.model.player.IconUrls</class>
+        <class>com.onesnzeroes.clashnzeroes.model.player.ClanEntity</class>
+        <class>com.onesnzeroes.clashnzeroes.model.player.BadgeUrls</class>
+        <class>com.onesnzeroes.clashnzeroes.model.player.LeagueEntity</class>
+
+        <class>com.onesnzeroes.clashnzeroes.model.war.WarEntity</class>
+        <class>com.onesnzeroes.clashnzeroes.model.war.AttackEntity</class>
+        <class>com.onesnzeroes.clashnzeroes.model.war.WarClanEntity</class>
+        <class>com.onesnzeroes.clashnzeroes.model.war.MemberEntity</class>
 
         <properties>
             <property name="jakarta.persistence.jdbc.driver" value="org.mariadb.jdbc.Driver"/>
