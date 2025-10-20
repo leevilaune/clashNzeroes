@@ -28,7 +28,8 @@ public class AttackEntity {
 
     @Column(name = "attack_order", nullable = false)
     @JsonProperty("order")
-    private int order;    private int duration;
+    private int order;
+    private int duration;
 
     public Long getId() {
         return id;

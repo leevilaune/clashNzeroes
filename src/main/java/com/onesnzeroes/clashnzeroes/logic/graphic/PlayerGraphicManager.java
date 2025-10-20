@@ -1,6 +1,7 @@
 package com.onesnzeroes.clashnzeroes.logic.graphic;
 
 import com.onesnzeroes.clashnzeroes.dao.PlayerDao;
+import com.onesnzeroes.clashnzeroes.model.TsField;
 import com.onesnzeroes.clashnzeroes.model.player.PlayerEntity;
 
 import javax.imageio.ImageIO;
@@ -38,8 +39,9 @@ public class PlayerGraphicManager {
 
     private void generateChart(String tag, String field) {
         List<Integer> data = new ArrayList<>();
+        List<TsField<Integer>> trophyData = new ArrayList<>();
         if(field.equalsIgnoreCase("trophies")){
-            data = dao.findTrophies(tag);
+            trophyData = dao.findTrophiesWithTs(tag);
         } else if (field.equalsIgnoreCase("donations")) {
             data = dao.findDonations(tag);
         }
