@@ -42,6 +42,7 @@ public class WarDao {
     }
 
     public void saveOrUpdate(WarEntity war) {
+        if (findAll().contains(war)) update(war);
         if (war.getId() == 0L) {
             persist(war);
         } else {

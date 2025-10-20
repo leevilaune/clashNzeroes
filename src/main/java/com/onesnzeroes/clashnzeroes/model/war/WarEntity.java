@@ -126,6 +126,25 @@ public class WarEntity {
     public void setOpponent(WarClanEntity opponent) {
         this.opponent = opponent;
     }
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+
+        WarEntity other = (WarEntity) obj;
+
+        if (this.endTime != other.endTime) return false;
+
+        String thisClanTag = this.clan != null ? this.clan.getTag() : null;
+        String thisOpponentTag = this.opponent != null ? this.opponent.getTag() : null;
+        String otherClanTag = other.clan != null ? other.clan.getTag() : null;
+        String otherOpponentTag = other.opponent != null ? other.opponent.getTag() : null;
+
+        return (thisClanTag != null && thisOpponentTag != null &&
+        otherClanTag != null && otherOpponentTag != null) &&
+        ((thisClanTag.equals(otherClanTag) && thisOpponentTag.equals(otherOpponentTag)) ||
+         (thisClanTag.equals(otherOpponentTag) && thisOpponentTag.equals(otherClanTag)));
+    }
 
     @Override
     public String toString() {
@@ -142,4 +161,5 @@ public class WarEntity {
                 ", opponent=" + opponent +
                 '}';
     }
+
 }
