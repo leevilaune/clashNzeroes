@@ -38,12 +38,12 @@ public class PlayerGraphicManager {
     }
 
     private void generateChart(String tag, String field) {
-        List<Integer> data = new ArrayList<>();
-        List<TsField<Integer>> trophyData = new ArrayList<>();
+        //List<Integer> data = new ArrayList<>();
+        List<TsField<Integer>> data = new ArrayList<>();
         if(field.equalsIgnoreCase("trophies")){
-            trophyData = dao.findTrophiesWithTs(tag);
+            data = dao.findTrophiesWithTs(tag);
         } else if (field.equalsIgnoreCase("donations")) {
-            data = dao.findDonations(tag);
+            data = dao.findDonationsWithTs(tag);
         }
         PlayerEntity player = this.dao.findLatestByTag(tag);
         String[] townHallImages = {
@@ -114,30 +114,36 @@ public class PlayerGraphicManager {
         }
         g.setFont(new Font("Dialog", Font.PLAIN, 12));
 
-        int maxTrophy = data.stream().max(Integer::compareTo).orElse(0);
-        int minTrophy = data.stream().min(Integer::compareTo).orElse(0);
-        int range = Math.max(25, maxTrophy - minTrophy);
+        // Compute min/max values and timestamps
+        int maxValue = data.stream().map(TsField::getField).max(Integer::compareTo).orElse(0);
+        int minValue = data.stream().map(TsField::getField).min(Integer::compareTo).orElse(0);
+        long minTs = data.stream().mapToLong(TsField::getTs).min().orElse(0L);
+        long maxTs = data.stream().mapToLong(TsField::getTs).max().orElse(0L);
+        int range = Math.max(25, maxValue - minValue);
         int margin = (int) (range * 0.05);
 
-
         g.setColor(Color.BLACK);
-        g.drawString(String.valueOf(maxTrophy),15,40);
-        g.drawString(String.valueOf(minTrophy),15,height-60);
+        g.drawString(String.valueOf(maxValue), 15, 40);
+        g.drawString(String.valueOf(minValue), 15, height - 60);
 
-        maxTrophy+=margin;
-        minTrophy-=margin;
-        range = Math.max(25, maxTrophy - minTrophy);
+        maxValue += margin;
+        minValue -= margin;
+        range = Math.max(25, maxValue - minValue);
 
         g.setColor(Color.ORANGE);
         int chartWidth = width - 100;
         int chartHeight = height - 100;
         int n = data.size();
 
+        if (maxTs == minTs) maxTs = minTs + 1; // Prevent division by zero if all timestamps are the same
+
         for (int i = 1; i < n; i++) {
-            int x1 = 50 + (i - 1) * chartWidth / (n - 1);
-            int x2 = 50 + i * chartWidth / (n - 1);
-            int y1 = height - 50 - (data.get(i - 1) - minTrophy) * chartHeight / range;
-            int y2 = height - 50 - (data.get(i) - minTrophy) * chartHeight / range;
+            TsField<Integer> prev = data.get(i - 1);
+            TsField<Integer> curr = data.get(i);
+            int x1 = 50 + (int) ((prev.getTs() - minTs) * chartWidth / (double) (maxTs - minTs));
+            int x2 = 50 + (int) ((curr.getTs() - minTs) * chartWidth / (double) (maxTs - minTs));
+            int y1 = height - 50 - (prev.getField() - minValue) * chartHeight / range;
+            int y2 = height - 50 - (curr.getField() - minValue) * chartHeight / range;
             g.drawLine(x1, y1, x2, y2);
         }
         drawRotatedCornerText(g,"© onesNzeroes 2025",width,height);
