@@ -1,6 +1,7 @@
 package com.onesnzeroes.clashnzeroes.dao;
 
 import com.onesnzeroes.clashnzeroes.datasource.MariaDbJpaConnection;
+import com.onesnzeroes.clashnzeroes.model.TsField;
 import com.onesnzeroes.clashnzeroes.model.player.ClanEntity;
 import com.onesnzeroes.clashnzeroes.model.player.LeagueEntity;
 import com.onesnzeroes.clashnzeroes.model.player.PlayerEntity;
@@ -134,7 +135,38 @@ public class PlayerDao {
             em.close();
         }
     }
+    public List<TsField<Integer>> findTrophiesWithTs(String tag) {
+        EntityManager em = MariaDbJpaConnection.getEntityManager();
+        try {
+            TypedQuery<Object[]> query = em.createQuery(
+                    "SELECT p.ts, p.trophies FROM PlayerEntity p WHERE p.tag = :tag ORDER BY p.ts ASC",
+                    Object[].class);
+            query.setParameter("tag", tag);
+            List<Object[]> results = query.getResultList();
 
+            return results.stream()
+                    .map(r -> new TsField<>((long) r[0], (Integer) r[1]))
+                    .toList();
+        } finally {
+            em.close();
+        }
+    }
+    public List<TsField<Integer>> findDonationsWithTs(String tag) {
+        EntityManager em = MariaDbJpaConnection.getEntityManager();
+        try {
+            TypedQuery<Object[]> query = em.createQuery(
+                    "SELECT p.ts, p.donations FROM PlayerEntity p WHERE p.tag = :tag ORDER BY p.ts ASC",
+                    Object[].class);
+            query.setParameter("tag", tag);
+            List<Object[]> results = query.getResultList();
+
+            return results.stream()
+                    .map(r -> new TsField<>((long) r[0], (Integer) r[1]))
+                    .toList();
+        } finally {
+            em.close();
+        }
+    }
     public List<PlayerEntity> findAll() {
         EntityManager em = MariaDbJpaConnection.getEntityManager();
         try {
