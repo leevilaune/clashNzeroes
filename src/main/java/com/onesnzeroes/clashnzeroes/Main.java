@@ -18,7 +18,7 @@ public class Main {
         WarDataScheduler wds = new WarDataScheduler(wm);
         PlayerManager pm = new PlayerManager(wds);
         PlayerDataScheduler scheduler = new PlayerDataScheduler(pm,3600000,wds);
-        //scheduler.schedule();
+        scheduler.schedule();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Shutting down scheduler " + Instant.now());
             scheduler.stop();
@@ -30,7 +30,7 @@ public class Main {
         //wm.saveCurrentWar(clanTag);
 
         //pm.savePlayers();
-
+        /*
         pmg.generateChartAsync("#QCPYVQRJ2","donations");
         pmg.generateChartAsync("#8L2RQ29G0","donations");
         pmg.generateChartAsync("#QUJLCCU","donations");
@@ -38,7 +38,7 @@ public class Main {
         pmg.generateChartAsync("#8L2RQ29G0","trophies");
         pmg.generateChartAsync("#QUJLCCU","trophies");
 
-         
+        */
 
 
         //pm.generateTrophyChartAsync("#8L2RQ29G0");
