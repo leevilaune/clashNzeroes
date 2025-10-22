@@ -52,8 +52,8 @@ public class WarDataScheduler {
             }
         };
 
-        this.scheduler.schedule(recordTask, delayMillis+1000, TimeUnit.MILLISECONDS);
-        Trace.info("Scheduled war recording for clan " + clanTag + " in " + delayMillis+1000 + " ms");
+        this.scheduler.schedule(recordTask, (delayMillis+1000), TimeUnit.MILLISECONDS);
+        Trace.info("Scheduled war recording for clan " + clanTag + " in " + (delayMillis+1000) + " ms");
     }
 
     public void loadTracked(){
