@@ -18,6 +18,11 @@
         <class>com.onesnzeroes.clashnzeroes.model.war.WarClanEntity</class>
         <class>com.onesnzeroes.clashnzeroes.model.war.MemberEntity</class>
 
+        <class>com.onesnzeroes.clashnzeroes.model.tracked.TrackedWar</class>
+        <class>com.onesnzeroes.clashnzeroes.model.tracked.TrackedPlayer</class>
+
+
+
         <properties>
             <property name="jakarta.persistence.jdbc.driver" value="org.mariadb.jdbc.Driver"/>
             <property name="jakarta.persistence.schema-generation.database.action" value="update"/>

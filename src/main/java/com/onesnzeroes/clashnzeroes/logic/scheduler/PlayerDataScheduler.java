@@ -1,6 +1,7 @@
 package com.onesnzeroes.clashnzeroes.logic.scheduler;
 
 import com.onesnzeroes.clashnzeroes.logic.manager.PlayerManager;
+import com.onesnzeroes.clashnzeroes.util.Trace;
 
 import java.time.Instant;
 import java.util.concurrent.Executors;
@@ -37,13 +38,13 @@ public class PlayerDataScheduler extends DataScheduler {
 
     @Override
     public void scheduledAction(){
-        System.out.println("Scheduled player save at " + Instant.now());
+        Trace.info("Scheduled player save at " + Instant.now());
         this.playerManager.savePlayers();
     }
 
     @Override
     public void onFinish(){
-        System.out.println("Finished saving players at " + Instant.now());
+        Trace.info("Finished saving players at " + Instant.now());
     }
 
     public void stop() {
