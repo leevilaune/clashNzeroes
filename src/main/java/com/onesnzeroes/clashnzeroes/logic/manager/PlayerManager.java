@@ -52,7 +52,7 @@ public class PlayerManager {
         if(we.getState() == null){
             Trace.warn("Clan " + clanTag + " doesnt have public war log");
         }else{
-            warScheduler.scheduleWarRecording(clanTag,we.getEndTime());
+            warScheduler.scheduleWarRecording(clanTag,we.getEndTime(),we.getPreparationStartTime());
         }
         this.dao.persist(player);
     }

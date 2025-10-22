@@ -18,10 +18,14 @@ public class Main {
         WarDataScheduler wds = new WarDataScheduler(wm);
         PlayerManager pm = new PlayerManager(wds);
         PlayerDataScheduler scheduler = new PlayerDataScheduler(pm,3600000,wds);
-        scheduler.schedule();
+        //scheduler.schedule();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Shutting down scheduler " + Instant.now());
             scheduler.stop();
         }));
+
+        pm.savePlayers();
+
+        //pmg.generateChartAsync("#8L2RQ29G0","trophies");
     }
 }

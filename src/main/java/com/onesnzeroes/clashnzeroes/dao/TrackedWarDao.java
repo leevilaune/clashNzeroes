@@ -4,6 +4,7 @@ import com.onesnzeroes.clashnzeroes.datasource.MariaDbJpaConnection;
 import com.onesnzeroes.clashnzeroes.model.player.PlayerEntity;
 import com.onesnzeroes.clashnzeroes.model.tracked.TrackedWar;
 import com.onesnzeroes.clashnzeroes.model.war.WarEntity;
+import com.onesnzeroes.clashnzeroes.util.Trace;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.TypedQuery;
@@ -33,14 +34,15 @@ public class TrackedWarDao {
             tx.begin();
 
             TypedQuery<Long> query = em.createQuery(
-                    "SELECT COUNT(w) FROM TrackedWar w WHERE w.tag = :tag AND w.endTs = :endTs", Long.class);
+                    "SELECT COUNT(w) FROM TrackedWar w WHERE w.tag = :tag AND w.preparationStartTs = :preparationStartTs", Long.class);
             query.setParameter("tag", war.getTag());
-            query.setParameter("endTs", war.getEndTs());
+            query.setParameter("preparationStartTs", war.getPreparationStartTs());
 
             Long count = query.getSingleResult();
             if (count == 0) {
                 em.persist(war);
             } else {
+                updateLatestByTag(war);
                 System.out.println("TrackedWar already exists for clanTag " + war.getTag() +
                         " with endTs " + war.getEndTs());
             }
@@ -53,15 +55,43 @@ public class TrackedWarDao {
             em.close();
         }
     }
-    public TrackedWar findByTag(String tag, long endTs) {
+    public TrackedWar findByTag(String tag, long preparationStartTs) {
         EntityManager em = MariaDbJpaConnection.getEntityManager();
         try {
             TypedQuery<TrackedWar> query = em.createQuery(
-                    "SELECT p FROM TrackedWar p WHERE p.tag = :tag AND p.endTs = :endTs",
+                    "SELECT p FROM TrackedWar p WHERE p.tag = :tag AND p.preparationStartTs = :preparationStartTs",
                     TrackedWar.class);
             query.setParameter("tag", tag);
-            query.setParameter("endTs", endTs);
+            query.setParameter("preparationStartTs", preparationStartTs);
             return query.getResultStream().findFirst().orElse(null);
+        } finally {
+            em.close();
+        }
+    }
+
+    public void updateLatestByTag(TrackedWar updatedWar) {
+        EntityManager em = MariaDbJpaConnection.getEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            TypedQuery<TrackedWar> query = em.createQuery(
+                    "SELECT w FROM TrackedWar w WHERE w.tag = :tag ORDER BY w.preparationStartTs DESC",
+                    TrackedWar.class);
+            query.setParameter("tag", updatedWar.getTag());
+            query.setMaxResults(1);
+            TrackedWar latestWar = query.getResultStream().findFirst().orElse(null);
+
+            if (latestWar != null) {
+                latestWar.setEndTs(updatedWar.getEndTs());
+                latestWar.setPreparationStartTs(updatedWar.getPreparationStartTs());
+                em.merge(latestWar);
+                Trace.info("Updated latest TrackedWar for tag " + updatedWar.getTag());
+            }
+
+            tx.commit();
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            e.printStackTrace();
         } finally {
             em.close();
         }

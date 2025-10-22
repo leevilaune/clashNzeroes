@@ -30,11 +30,11 @@ public class WarDataScheduler {
         loadTracked();
     }
 
-    public void scheduleWarRecording(String clanTag, long warEndTime) {
+    public void scheduleWarRecording(String clanTag, long warEndTime, Long preparationStartTime) {
         if(alreadyScheduled.contains(clanTag)) return;
         if(Instant.now().getEpochSecond() > warEndTime) return;
         alreadyScheduled.add(clanTag);
-        this.dao.persistIfNotExists(new TrackedWar(clanTag,warEndTime));
+        this.dao.persistIfNotExists(new TrackedWar(clanTag,warEndTime, preparationStartTime));
 
         long nowMillis = Instant.now().toEpochMilli();
         long warEndMillis = warEndTime * 1000;
@@ -58,7 +58,7 @@ public class WarDataScheduler {
 
     public void loadTracked(){
         List<TrackedWar> trackedWars = this.dao.findAll();
-        trackedWars.forEach(w -> scheduleWarRecording(w.getTag(),w.getEndTs()));
+        trackedWars.forEach(w -> scheduleWarRecording(w.getTag(),w.getEndTs(),w.getPreparationStartTs()));
     }
 
     public void stop() {

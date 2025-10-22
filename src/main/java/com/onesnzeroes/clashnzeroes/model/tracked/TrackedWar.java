@@ -1,6 +1,7 @@
 package com.onesnzeroes.clashnzeroes.model.tracked;
 
 import jakarta.persistence.*;
+import org.checkerframework.checker.units.qual.C;
 
 import java.time.Instant;
 import java.util.Objects;
@@ -16,11 +17,15 @@ public class TrackedWar {
 
     @Column(name = "end_ts")
     private long endTs;
+
+    @Column(name = "preparation_start_ts")
+    private Long preparationStartTs;
     private long ts;
 
-    public TrackedWar(String tag, long endTs){
+    public TrackedWar(String tag, long endTs, Long preparationStartTs){
         this.tag = tag;
         this.endTs = endTs;
+        this.preparationStartTs = preparationStartTs;
         this.ts = Instant.now().getEpochSecond();
     }
 
@@ -56,6 +61,14 @@ public class TrackedWar {
 
     public void setTs(long ts) {
         this.ts = ts;
+    }
+
+    public Long getPreparationStartTs() {
+        return preparationStartTs;
+    }
+
+    public void setPreparationStartTs(Long preparationStartTs) {
+        this.preparationStartTs = preparationStartTs;
     }
 
     @Override
