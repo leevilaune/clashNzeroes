@@ -24,6 +24,8 @@ public class Main {
             scheduler.stop();
         }));
 
+        //wm.saveCurrentWar("#8LL8QYQ0");
+
         //pm.savePlayer("#G0Y0GRLGQ");
         //pm.verifyPlayerStatus("#G0Y0GRLGQ","akpezsdg");
         //pm.savePlayers();
@@ -38,7 +40,11 @@ public class Main {
         pmg.generateChartAsync("#8L2RQ29G0","trophies");
         pmg.generateChartAsync("#QUJLCCU","trophies");
 
-        */
+         */
+
+
+
+
 
 
         //pm.generateTrophyChartAsync("#8L2RQ29G0");
