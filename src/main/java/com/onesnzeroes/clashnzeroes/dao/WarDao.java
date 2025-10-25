@@ -2,6 +2,7 @@ package com.onesnzeroes.clashnzeroes.dao;
 
 
 import com.onesnzeroes.clashnzeroes.datasource.MariaDbJpaConnection;
+import com.onesnzeroes.clashnzeroes.model.war.AttackEntity;
 import com.onesnzeroes.clashnzeroes.model.war.WarEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
@@ -89,6 +90,34 @@ public class WarDao {
             query.setMaxResults(1);
             List<WarEntity> result = query.getResultList();
             return result.isEmpty() ? null : result.get(0);
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<AttackEntity> findAttacksByTag(String tag) {
+        EntityManager em = MariaDbJpaConnection.getEntityManager();
+        try {
+            TypedQuery<AttackEntity> query = em.createQuery(
+                    "SELECT a FROM AttackEntity a WHERE a.attackerTag = :tag",
+                    AttackEntity.class
+            );
+            query.setParameter("tag", tag);
+            return query.getResultList().stream().distinct().toList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<AttackEntity> findDefencesByTag(String tag) {
+        EntityManager em = MariaDbJpaConnection.getEntityManager();
+        try {
+            TypedQuery<AttackEntity> query = em.createQuery(
+                    "SELECT a FROM AttackEntity a WHERE a.defenderTag = :tag",
+                    AttackEntity.class
+            );
+            query.setParameter("tag", tag);
+            return query.getResultList().stream().distinct().toList();
         } finally {
             em.close();
         }
