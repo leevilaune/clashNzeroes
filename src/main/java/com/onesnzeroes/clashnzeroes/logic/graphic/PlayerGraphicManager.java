@@ -19,14 +19,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class PlayerGraphicManager {
+public class PlayerGraphicManager extends GraphicManager{
 
     private PlayerDao dao;
+    private String tag;
+    private String field;
 
     public PlayerGraphicManager(PlayerDao dao){
+        super(dao);
         this.dao = dao;
     }
-
+    public PlayerGraphicManager(PlayerDao dao,String tag, String field){
+        super(dao,tag,field);
+        this.dao = dao;
+        this.tag = tag;
+        this.field = field;
+    }
+    /*
     public void generateChartAsync(String tag, String type) {
         CompletableFuture<Void> future = CompletableFuture.runAsync(() -> generateChart(tag,type))
                 .thenRun(() -> System.out.println("Chart generation complete for " + tag))
@@ -37,7 +46,7 @@ public class PlayerGraphicManager {
         future.join();
     }
 
-    private void generateChart(String tag, String field) {
+    protected void generateChart(String tag, String field) {
         List<TsField<Integer>> data = new ArrayList<>();
         if(field.equalsIgnoreCase("trophies")){
             data = dao.findTrophiesWithTs(tag);
@@ -135,6 +144,59 @@ public class PlayerGraphicManager {
 
         }
         g.setFont(new Font("Dialog", Font.PLAIN, 12));
+    }
+
+     */
+
+    public void setTag(String tag){
+        super.setTag(tag);
+        this.tag = tag;
+    }
+
+    public void setField(String field){
+        super.setTitle(field);
+        this.field = field;
+    }
+    @Override
+    public void drawGraph(Graphics2D g){
+        List<TsField<Integer>> data = new ArrayList<>();
+
+        if(this.field.equalsIgnoreCase("trophies")){
+            data = this.dao.findTrophiesWithTs(this.tag);
+        } else if (field.equalsIgnoreCase("donations")) {
+            data = this.dao.findDonationsWithTs(this.tag);
+        }
+        int maxValue = data.stream().map(TsField::getField).max(Integer::compareTo).orElse(0);
+        int minValue = data.stream().map(TsField::getField).min(Integer::compareTo).orElse(0);
+        long minTs = data.stream().mapToLong(TsField::getTs).min().orElse(0L);
+        long maxTs = data.stream().mapToLong(TsField::getTs).max().orElse(0L);
+        int range = Math.max(25, maxValue - minValue);
+        int margin = (int) (range * 0.05);
+
+        g.setColor(Color.BLACK);
+        g.drawString(String.valueOf(maxValue), 15, 40);
+        g.drawString(String.valueOf(minValue), 15, HEIGHT - 60);
+
+        maxValue += margin;
+        minValue -= margin;
+        range = Math.max(25, maxValue - minValue);
+
+        g.setColor(Color.ORANGE);
+        int chartWidth = WIDTH - 100;
+        int chartHeight = HEIGHT - 100;
+        int n = data.size();
+
+        if (maxTs == minTs) maxTs = minTs + 1;
+
+        for (int i = 1; i < n; i++) {
+            TsField<Integer> prev = data.get(i - 1);
+            TsField<Integer> curr = data.get(i);
+            int x1 = 50 + (int) ((prev.getTs() - minTs) * chartWidth / (double) (maxTs - minTs));
+            int x2 = 50 + (int) ((curr.getTs() - minTs) * chartWidth / (double) (maxTs - minTs));
+            int y1 = HEIGHT - 50 - (prev.getField() - minValue) * chartHeight / range;
+            int y2 = HEIGHT - 50 - (curr.getField() - minValue) * chartHeight / range;
+            g.drawLine(x1, y1, x2, y2);
+        }
     }
 
     private void drawGraph(Graphics2D g, List<TsField<Integer>> data, int width, int height) {
