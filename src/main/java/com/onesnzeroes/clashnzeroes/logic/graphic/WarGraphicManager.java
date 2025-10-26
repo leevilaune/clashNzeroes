@@ -66,11 +66,14 @@ public class WarGraphicManager extends GraphicManager {
             g.setColor(Color.BLACK);
             g.drawString(numberText, chartX(numberX), numberY);
 
-            String starsText = "⭐".repeat(i);
+            String starsText = "★".repeat(i);
             int starsWidth = fm.stringWidth(starsText);
             int starsX = (int) (localX + colWidth / 2.0 - starsWidth / 2.0);
             int starsY = starRectY + STAR_RECT_HEIGHT - 3;
+            g.setColor(Color.YELLOW);
+            Font f = g.getFont();
             g.drawString(starsText, chartX(starsX), starsY);
+            g.setFont(f);
 
             g.setColor(new Color(100, 150, 240));
         }
