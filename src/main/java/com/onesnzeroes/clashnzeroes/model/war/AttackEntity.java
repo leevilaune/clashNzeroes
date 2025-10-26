@@ -3,7 +3,10 @@ package com.onesnzeroes.clashnzeroes.model.war;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.onesnzeroes.clashnzeroes.util.Trace;
 import jakarta.persistence.*;
+
+import java.util.Objects;
 
 @Entity
 @Table(name = "warattack")
@@ -85,6 +88,18 @@ public class AttackEntity {
 
     public void setDuration(int duration) {
         this.duration = duration;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AttackEntity that)) return false;
+        return stars == that.stars && Double.compare(destructionPercentage, that.destructionPercentage) == 0 && order == that.order && duration == that.duration && Objects.equals(attackerTag, that.attackerTag) && Objects.equals(defenderTag, that.defenderTag);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(attackerTag, defenderTag, stars, destructionPercentage, order, duration);
     }
 
     @Override

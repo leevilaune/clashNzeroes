@@ -19,14 +19,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class PlayerGraphicManager {
+public class PlayerGraphicManager extends GraphicManager{
 
     private PlayerDao dao;
+    private String tag;
+    private String field;
 
     public PlayerGraphicManager(PlayerDao dao){
+        super(dao);
         this.dao = dao;
     }
-
+    public PlayerGraphicManager(PlayerDao dao,String tag, String field){
+        super(dao,tag,field);
+        this.dao = dao;
+        this.tag = tag;
+        this.field = field;
+    }
+    /*
     public void generateChartAsync(String tag, String type) {
         CompletableFuture<Void> future = CompletableFuture.runAsync(() -> generateChart(tag,type))
                 .thenRun(() -> System.out.println("Chart generation complete for " + tag))
@@ -37,8 +46,7 @@ public class PlayerGraphicManager {
         future.join();
     }
 
-    private void generateChart(String tag, String field) {
-        //List<Integer> data = new ArrayList<>();
+    protected void generateChart(String tag, String field) {
         List<TsField<Integer>> data = new ArrayList<>();
         if(field.equalsIgnoreCase("trophies")){
             data = dao.findTrophiesWithTs(tag);
@@ -46,6 +54,32 @@ public class PlayerGraphicManager {
             data = dao.findDonationsWithTs(tag);
         }
         PlayerEntity player = this.dao.findLatestByTag(tag);
+        if (data.isEmpty()) {
+            System.out.println("No trophies found for tag " + tag);
+            return;
+        }
+
+        int width = 600;
+        int height = 400;
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = image.createGraphics();
+
+        createBaseFrame(g, player, field, width, height);
+        drawGraph(g, data, width, height);
+
+        drawRotatedCornerText(g,"© onesNzeroes 2025",width,height);
+        g.dispose();
+
+        try {
+            File outFile = new File(field+"_" + tag + ".png");
+            ImageIO.write(image, "png", outFile);
+            System.out.println("Chart saved: " + outFile.getAbsolutePath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void createBaseFrame(Graphics2D g, PlayerEntity player, String field, int width, int height) {
         String[] townHallImages = {
                 "https://static.wikia.nocookie.net/clashofclans/images/f/fd/Town_Hall1.png",
                 "https://static.wikia.nocookie.net/clashofclans/images/7/7d/Town_Hall2.png",
@@ -65,37 +99,34 @@ public class PlayerGraphicManager {
                 "https://static.wikia.nocookie.net/clashofclans/images/5/53/Town_Hall16.png",
                 "https://static.wikia.nocookie.net/clashofclans/images/2/24/Town_Hall17-1.png"
         };
-        if (data.isEmpty()) {
-            System.out.println("No trophies found for tag " + tag);
-            return;
-        }
-
-        int width = 600;
-        int height = 400;
         int badgeWidth = 50;
         int badgeHeight = 50;
         int badgeX = width - 75;
         int badgeY = height - 50;
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        Graphics2D g = image.createGraphics();
+
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+
         g.setColor(Color.WHITE);
         g.fillRect(0, 0, width, height);
+
         g.setColor(Color.BLACK);
-        //g.drawString(player.getName() + player.getTag() + " (TH" + player.getTownHallLevel() + ") - " + player.getClan().getName(), 50, 20);
         g.drawLine(50, height - 50, width - 30, height - 50);
         g.drawLine(50, 30, 50, height - 50);
+
         g.setFont(new Font("Dialog", Font.PLAIN, 18));
         g.drawString(player.getName()+player.getTag(),100,height-30);
         g.drawString(String.valueOf(player.getTownHallLevel()),125,height-10);
         g.drawString(String.valueOf(player.getTrophies()),180,height-10);
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         g.drawString(LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).format(formatter),width-175,25);
+
         String title = field.substring(0, 1).toUpperCase() + field.substring(1);
         g.drawString(title + " History", 50, 25);
+
         g.setFont(new Font("Dialog", Font.PLAIN, 18));
         FontMetrics fm = g.getFontMetrics();
         String clanName = player.getClan().getName();
@@ -113,8 +144,62 @@ public class PlayerGraphicManager {
 
         }
         g.setFont(new Font("Dialog", Font.PLAIN, 12));
+    }
 
-        // Compute min/max values and timestamps
+     */
+
+    public void setTag(String tag){
+        super.setTag(tag);
+        this.tag = tag;
+    }
+
+    public void setField(String field){
+        super.setTitle(field);
+        this.field = field;
+    }
+    @Override
+    public void drawGraph(Graphics2D g){
+        List<TsField<Integer>> data = new ArrayList<>();
+
+        if(this.field.equalsIgnoreCase("trophies")){
+            data = this.dao.findTrophiesWithTs(this.tag);
+        } else if (field.equalsIgnoreCase("donations")) {
+            data = this.dao.findDonationsWithTs(this.tag);
+        }
+        int maxValue = data.stream().map(TsField::getField).max(Integer::compareTo).orElse(0);
+        int minValue = data.stream().map(TsField::getField).min(Integer::compareTo).orElse(0);
+        long minTs = data.stream().mapToLong(TsField::getTs).min().orElse(0L);
+        long maxTs = data.stream().mapToLong(TsField::getTs).max().orElse(0L);
+        int range = Math.max(25, maxValue - minValue);
+        int margin = (int) (range * 0.05);
+
+        g.setColor(Color.BLACK);
+        g.drawString(String.valueOf(maxValue), 15, 40);
+        g.drawString(String.valueOf(minValue), 15, HEIGHT - 60);
+
+        maxValue += margin;
+        minValue -= margin;
+        range = Math.max(25, maxValue - minValue);
+
+        g.setColor(Color.ORANGE);
+        int chartWidth = WIDTH - 100;
+        int chartHeight = HEIGHT - 100;
+        int n = data.size();
+
+        if (maxTs == minTs) maxTs = minTs + 1;
+
+        for (int i = 1; i < n; i++) {
+            TsField<Integer> prev = data.get(i - 1);
+            TsField<Integer> curr = data.get(i);
+            int x1 = 50 + (int) ((prev.getTs() - minTs) * chartWidth / (double) (maxTs - minTs));
+            int x2 = 50 + (int) ((curr.getTs() - minTs) * chartWidth / (double) (maxTs - minTs));
+            int y1 = HEIGHT - 50 - (prev.getField() - minValue) * chartHeight / range;
+            int y2 = HEIGHT - 50 - (curr.getField() - minValue) * chartHeight / range;
+            g.drawLine(x1, y1, x2, y2);
+        }
+    }
+
+    private void drawGraph(Graphics2D g, List<TsField<Integer>> data, int width, int height) {
         int maxValue = data.stream().map(TsField::getField).max(Integer::compareTo).orElse(0);
         int minValue = data.stream().map(TsField::getField).min(Integer::compareTo).orElse(0);
         long minTs = data.stream().mapToLong(TsField::getTs).min().orElse(0L);
@@ -135,7 +220,7 @@ public class PlayerGraphicManager {
         int chartHeight = height - 100;
         int n = data.size();
 
-        if (maxTs == minTs) maxTs = minTs + 1; // Prevent division by zero if all timestamps are the same
+        if (maxTs == minTs) maxTs = minTs + 1;
 
         for (int i = 1; i < n; i++) {
             TsField<Integer> prev = data.get(i - 1);
@@ -146,17 +231,8 @@ public class PlayerGraphicManager {
             int y2 = height - 50 - (curr.getField() - minValue) * chartHeight / range;
             g.drawLine(x1, y1, x2, y2);
         }
-        drawRotatedCornerText(g,"© onesNzeroes 2025",width,height);
-        g.dispose();
-
-        try {
-            File outFile = new File(field+"_" + tag + ".png");
-            ImageIO.write(image, "png", outFile);
-            System.out.println("Chart saved: " + outFile.getAbsolutePath());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
+
     private void drawRotatedCornerText(Graphics2D g2d, String text, int imageWidth, int imageHeight) {
         AffineTransform oldTransform = g2d.getTransform();
         Composite oldComposite = g2d.getComposite();

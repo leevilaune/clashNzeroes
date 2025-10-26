@@ -1,12 +1,16 @@
 package com.onesnzeroes.clashnzeroes;
 
 import com.onesnzeroes.clashnzeroes.dao.PlayerDao;
+import com.onesnzeroes.clashnzeroes.dao.WarDao;
+import com.onesnzeroes.clashnzeroes.logic.graphic.WarGraphicManager;
 import com.onesnzeroes.clashnzeroes.logic.manager.PlayerManager;
 import com.onesnzeroes.clashnzeroes.logic.manager.WarManager;
 import com.onesnzeroes.clashnzeroes.logic.graphic.PlayerGraphicManager;
 import com.onesnzeroes.clashnzeroes.logic.scheduler.PlayerDataScheduler;
 import com.onesnzeroes.clashnzeroes.logic.scheduler.WarDataScheduler;
+import com.onesnzeroes.clashnzeroes.model.war.AttackEntity;
 import com.onesnzeroes.clashnzeroes.model.war.WarEntity;
+import com.onesnzeroes.clashnzeroes.util.Trace;
 
 import java.time.Instant;
 
@@ -14,6 +18,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         PlayerGraphicManager pmg = new PlayerGraphicManager(new PlayerDao());
+        WarGraphicManager wmg = new WarGraphicManager(new WarDao(),new PlayerDao());
         WarManager wm = new WarManager();
         WarDataScheduler wds = new WarDataScheduler(wm);
         PlayerManager pm = new PlayerManager(wds);
@@ -23,7 +28,5 @@ public class Main {
             System.out.println("Shutting down scheduler " + Instant.now());
             scheduler.stop();
         }));
-
-        //pmg.generateChartAsync("#8L2RQ29G0","trophies");
     }
 }
