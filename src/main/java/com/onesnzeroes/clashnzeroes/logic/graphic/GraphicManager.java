@@ -64,7 +64,7 @@ public class GraphicManager {
         createBaseFrame(g, player, this.title);
         drawGraph(g);
 
-        drawRotatedCornerText(g,"© onesNzeroes 2025",WIDTH,HEIGHT);
+        drawRotatedCornerText(g,"[C] onesNzeroes 2025",WIDTH,HEIGHT);
         g.dispose();
 
         try {

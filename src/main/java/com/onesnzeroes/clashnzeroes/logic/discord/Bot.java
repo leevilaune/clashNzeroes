@@ -118,7 +118,7 @@ public class Bot extends ListenerAdapter {
             String playerTag = event.getOption("tag").getAsString();
 
             this.playerGm.setTag(playerTag);
-            this.playerGm.setTitle("donations");
+            this.playerGm.setField("donations");
             this.playerGm.generateChartAsync()
                     .thenAccept(file -> {
                         event.getHook()
