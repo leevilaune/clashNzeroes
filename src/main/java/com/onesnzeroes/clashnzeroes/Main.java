@@ -22,7 +22,7 @@ public class Main {
         PlayerGraphicManager pmg = new PlayerGraphicManager(new PlayerDao(),pm);
         WarGraphicManager wmg = new WarGraphicManager(new WarDao(),new PlayerDao(),pm);
         PlayerDataScheduler scheduler = new PlayerDataScheduler(pm,3600000,wds);
-        //scheduler.schedule();
+        scheduler.schedule();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Shutting down scheduler " + Instant.now());
             scheduler.stop();
