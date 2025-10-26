@@ -29,7 +29,6 @@ public class DataScheduler {
     public DataScheduler(long periodMillis) {
         this.scheduler = Executors.newScheduledThreadPool(1);
         this.periodMillis = periodMillis;
-        // Register a JVM shutdown hook to stop the scheduler gracefully
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Shutting down " + Instant.now());
             scheduler.shutdown();

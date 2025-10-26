@@ -3,6 +3,7 @@ package com.onesnzeroes.clashnzeroes.logic.graphic;
 
 import com.onesnzeroes.clashnzeroes.dao.PlayerDao;
 import com.onesnzeroes.clashnzeroes.dao.WarDao;
+import com.onesnzeroes.clashnzeroes.logic.manager.PlayerManager;
 import com.onesnzeroes.clashnzeroes.model.war.AttackEntity;
 
 import java.awt.*;
@@ -18,8 +19,8 @@ public class WarGraphicManager extends GraphicManager {
     private static final int COL_SPACING = 10;
     private static final int STAR_RECT_HEIGHT = 15;
 
-    public WarGraphicManager(WarDao dao, PlayerDao pDao) {
-        super(pDao);
+    public WarGraphicManager(WarDao dao, PlayerDao pDao, PlayerManager pm) {
+        super(pDao,pm);
         this.dao = dao;
     }
 
@@ -150,6 +151,12 @@ public class WarGraphicManager extends GraphicManager {
             double paddingFactor = 0.1;
             double paddedMin = globalMin - (globalMax - globalMin) * paddingFactor;
             double paddedMax = globalMax + (globalMax - globalMin) * paddingFactor;
+            if (c == 1) {
+                paddedMax = Math.min(paddedMax, 100);
+                paddedMin = Math.max(paddedMin, 0);
+            }else if(c==0){
+                paddedMax = Math.min(paddedMax,180);
+            }
             double paddedRange = paddedMax - paddedMin;
 
             g.drawString(String.format("%.0f", paddedMax), chartX(areaX + 5), chartY(chartTopY + 26));
