@@ -28,6 +28,10 @@ public class WarDataScheduler {
         this.scheduler = Executors.newScheduledThreadPool(4);
         this.dao = new TrackedWarDao();
         loadTracked();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("Shutting down " + Instant.now());
+            scheduler.shutdown();
+        }));
     }
 
     public void scheduleWarRecording(String clanTag, long warEndTime, Long preparationStartTime) {

@@ -57,6 +57,24 @@ public class PlayerManager {
         this.dao.persist(player);
     }
 
+    public PlayerEntity getPlayer(String playerTag) throws IOException, InterruptedException {
+        String encodedTag = playerTag.replace("#", "%23");
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + "/players/" + encodedTag))
+                .header("Authorization", "Bearer " + API_TOKEN)
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+
+        HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        System.out.println("Response code: " + response.statusCode());
+        System.out.println(response.body());
+        PlayerEntity player = mapper.readValue(response.body(), PlayerEntity.class);
+
+        return player;
+    }
 
     public void savePlayers(){
         this.dao.findUniquePlayerTags().forEach(tag -> {

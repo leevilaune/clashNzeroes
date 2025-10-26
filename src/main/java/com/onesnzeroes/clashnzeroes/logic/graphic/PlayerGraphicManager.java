@@ -1,6 +1,7 @@
 package com.onesnzeroes.clashnzeroes.logic.graphic;
 
 import com.onesnzeroes.clashnzeroes.dao.PlayerDao;
+import com.onesnzeroes.clashnzeroes.logic.manager.PlayerManager;
 import com.onesnzeroes.clashnzeroes.model.TsField;
 import com.onesnzeroes.clashnzeroes.model.player.PlayerEntity;
 
@@ -25,8 +26,8 @@ public class PlayerGraphicManager extends GraphicManager{
     private String tag;
     private String field;
 
-    public PlayerGraphicManager(PlayerDao dao){
-        super(dao);
+    public PlayerGraphicManager(PlayerDao dao, PlayerManager pm){
+        super(dao,pm);
         this.dao = dao;
     }
     public PlayerGraphicManager(PlayerDao dao,String tag, String field){

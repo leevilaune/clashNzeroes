@@ -1,6 +1,7 @@
 package com.onesnzeroes.clashnzeroes.logic.graphic;
 
 import com.onesnzeroes.clashnzeroes.dao.PlayerDao;
+import com.onesnzeroes.clashnzeroes.logic.manager.PlayerManager;
 import com.onesnzeroes.clashnzeroes.model.TsField;
 import com.onesnzeroes.clashnzeroes.model.player.PlayerEntity;
 
@@ -26,11 +27,13 @@ public class GraphicManager {
     protected static final int HEIGHT = 400;
 
     private PlayerDao dao;
+    private PlayerManager pm;
     private String tag;
     private String title;
 
-    public GraphicManager(PlayerDao dao){
+    public GraphicManager(PlayerDao dao, PlayerManager pm){
         this.dao = dao;
+        this.pm = pm;
     }
     public GraphicManager(PlayerDao dao, String tag, String title){
         this.dao = dao;
@@ -38,18 +41,23 @@ public class GraphicManager {
         this.title = title;
     }
 
-    public void generateChartAsync() {
-        CompletableFuture<Void> future = CompletableFuture.runAsync(this::generateChart)
-                .thenRun(() -> System.out.println("Chart generation complete for " +this.tag))
-                .exceptionally(ex -> {
-                    ex.printStackTrace();
-                    return null;
-                });
-        future.join();
+    public CompletableFuture<File> generateChartAsync() {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return generateChart();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
-    protected void generateChart() {
-        PlayerEntity player = this.dao.findLatestByTag(this.tag);
+    protected File generateChart() {
+        PlayerEntity player = null;
+        try {
+            player = this.pm.getPlayer(this.tag);
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = image.createGraphics();
 
@@ -63,9 +71,11 @@ public class GraphicManager {
             File outFile = new File(title+"_" + tag + ".png");
             ImageIO.write(image, "png", outFile);
             System.out.println("Chart saved: " + outFile.getAbsolutePath());
+            return outFile;
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
     public void drawGraph(Graphics2D g){
