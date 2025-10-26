@@ -30,40 +30,39 @@ public class Bot extends ListenerAdapter {
 
         var jda = JDABuilder.createDefault(token)
                 .setActivity(Activity.playing("Overgrowth + zapquake!"))
-                .addEventListeners(new Bot(this.gm,this.playerGm))
+                .addEventListeners(new Bot(this.gm, this.playerGm))
                 .build()
                 .awaitReady();
 
-        jda.updateCommands().addCommands(
-                Commands.slash("ping", "Replies with Pong!"),
-                Commands.slash("war", "Generates a war history chart")
-                        .addOption(OptionType.STRING, "tag", "The player tag", true),
-                Commands.slash("trophies", "Generates a trophy history chart")
-                        .addOption(OptionType.STRING,
-                                "tag", "The player tag", true),
-                Commands.slash("donations", "Generates a donation history chart")
-                        .addOption(OptionType.STRING,
-                                "tag", "The player tag", true)
-        ).queue();
+        jda.retrieveCommands().queue(existingCommands -> {
+            boolean pingExists = existingCommands.stream()
+                    .anyMatch(c -> c.getName().equals("ping"));
+            boolean warExists = existingCommands.stream()
+                    .anyMatch(c -> c.getName().equals("war"));
+            boolean trophiesExists = existingCommands.stream()
+                    .anyMatch(c -> c.getName().equals("trophies"));
+            boolean donationsExists = existingCommands.stream()
+                    .anyMatch(c -> c.getName().equals("donations"));
 
-        var guild = jda.getGuildById("807397412586258432");
-        if (guild != null) {
-            guild.updateCommands().addCommands(
-                    Commands.slash("ping", "Replies with Pong!"),
-                    Commands.slash("war", "Generates a war history chart")
-                            .addOption(OptionType.STRING,
-                                    "tag", "The player tag", true),
-                    Commands.slash("trophies", "Generates a trophy history chart")
-                            .addOption(OptionType.STRING,
-                                    "tag", "The player tag", true),
-                    Commands.slash("donations", "Generates a donation history chart")
-                            .addOption(OptionType.STRING,
-                                    "tag", "The player tag", true)
-            ).queue();
-            System.out.println("Guild commands registered for " + guild.getName());
-        } else {
-            System.err.println("Guild not found! Check the guild ID.");
-        }
+            if (!pingExists) {
+                jda.upsertCommand("ping", "Replies with Pong!").queue();
+            }
+            if (!warExists) {
+                jda.upsertCommand("war", "Generates a war history chart")
+                        .addOption(OptionType.STRING, "tag", "The player tag", true)
+                        .queue();
+            }
+            if (!trophiesExists) {
+                jda.upsertCommand("trophies", "Generates a trophy history chart")
+                        .addOption(OptionType.STRING, "tag", "The player tag", true)
+                        .queue();
+            }
+            if (!donationsExists) {
+                jda.upsertCommand("donations", "Generates a donation history chart")
+                        .addOption(OptionType.STRING, "tag", "The player tag", true)
+                        .queue();
+            }
+        });
     }
 
     @Override
