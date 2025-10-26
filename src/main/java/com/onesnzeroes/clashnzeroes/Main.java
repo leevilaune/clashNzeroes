@@ -23,22 +23,10 @@ public class Main {
         WarDataScheduler wds = new WarDataScheduler(wm);
         PlayerManager pm = new PlayerManager(wds);
         PlayerDataScheduler scheduler = new PlayerDataScheduler(pm,3600000,wds);
-        //scheduler.schedule();
+        scheduler.schedule();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Shutting down scheduler " + Instant.now());
             scheduler.stop();
         }));
-        //wm.getAttacks("#QUJLCCU").forEach(System.out::println);
-        pmg.setTag("#8L2RQ29G0");
-        pmg.setField("donations");
-        String playerTag = "#QCPYVQRJ2";
-        wmg.setTag(playerTag);
-        wmg.setTitle("war");
-        //pmg.generateChartAsync();
-        wmg.generateChartAsync();
-        wm.getDefences(playerTag).forEach(d -> Trace.info(d.toString()));
-        wm.getAttacks(playerTag).forEach(a -> Trace.info(a.toString()));
-
-
     }
 }
